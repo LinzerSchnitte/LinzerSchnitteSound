@@ -34,6 +34,7 @@ snd_seq_t *seq_handle;
 snd_pcm_t *playback_handle;
 short *buf;
 double phi[POLY], velocity[POLY], attack, decay, sustain, release, env_time[POLY], env_level[POLY];
+double gain;
 int note[POLY], gate[POLY], note_active[POLY];
 unsigned int rate = 48000;
 /*int polyphony, buffersize, outputvolume, firstnotefreq, freqchannelwidth; */
@@ -178,7 +179,7 @@ int playback_callback (snd_pcm_sframes_t nframes) {
 /* NEED faster OPTION THAN SIN (phi) */
 /* maybe series expantion? */
 /* maybe lookup tables? */
-                sound = GAIN * sin(phi[l2])* envelope(&note_active[l2], gate[l2], &env_level[l2], env_time[l2], attack, decay, sustain, release);
+                sound = gain * sin(phi[l2])* envelope(&note_active[l2], gate[l2], &env_level[l2], env_time[l2], attack, decay, sustain, release);
                 env_time[l2] += 1.0 / rate;
                 buf[2 * l1] += sound;
                 buf[2 * l1 + 1] += sound;
@@ -193,8 +194,8 @@ int main (int argc, char *argv[]) {
     int nfds, seq_nfds, l1;
     struct pollfd *pfds;
 
-    if (argc < 6) {
-        fprintf(stderr, "LinzerSchnitteMIDI <hw:0,0,1> <attack> <decay> <sustain> <release>\n"); 
+    if (argc < 7) {
+        fprintf(stderr, "LinzerSchnitteMIDI <hw:0,0,1> <attack> <decay> <sustain> <release> <gain>\n"); 
         exit(1);
     }
 
@@ -202,6 +203,7 @@ int main (int argc, char *argv[]) {
     decay = atof(argv[3]);
     sustain = atof(argv[4]);
     release = atof(argv[5]);
+    gain = atof(argv[6]);
 /*    polyphony = atoi(argv[6]);
     buffersize = atoi(argv[7]);
     outputvolume = atoi(argv[8]);
